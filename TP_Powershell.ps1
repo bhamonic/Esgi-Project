@@ -1,12 +1,7 @@
-<#	
-	.NOTES
-	===========================================================================
-	 Created on:   	16/07/2019 12:09
-	 Filename:     	
-	===========================================================================
-	.DESCRIPTION
-		A description of the file.
-#>
+# Script Projet PowerShell
+# Name : Huy-Dat Nguyen / Brian Hamonic / Michael Lapray
+# Name Script : TP_Powershell.ps1 et User_AD.ps1
+# Date : 19/07/2019
 
 #Region Environment
 Import-Module ActiveDirectory
