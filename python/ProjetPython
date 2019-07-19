@@ -1,0 +1,76 @@
+import socket
+import select
+hote = ‘’
+port = 12800
+connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+connexion_principale.bind((hote, port))
+connexion_principale.listen(5)
+print(“The server is now listening on port {}“.format(port))
+serveur_lance = True
+clients_connectes = []
+while serveur_lance:
+   connexions_demandees, wlist, xlist = select.select([connexion_principale],[], [], 0.05)
+   for connexion in connexions_demandees:
+       connexion_avec_client, infos_connexion = connexion.accept()
+       clients_connectes.append(connexion_avec_client)
+       msg_recu = connexion_avec_client.recv(1024)
+       print(msg_recu.decode())
+       connexion_avec_client.send(b”Hello !“)
+       connexion_avec_client.send(b”Who are you ? (login & password”)
+       connexion_avec_client.send(b”Login :“)
+       login = connexion_avec_client.recv(1024)
+       print(login.decode())
+       connexion_avec_client.send(b”Password :“)
+       passwd = connexion_avec_client.recv(1024)
+       print(passwd.decode())
+       connexion_avec_client.send(b”Ok”)
+   clients_a_lire = []
+   try:
+       clients_a_lire, wlist, xlist = select.select(clients_connectes,[], [], 0.05)
+   except select.error:
+       pass
+   else:
+       for client in clients_a_lire:
+           msg_recu = client.recv(1024)
+           msg_recu = msg_recu.decode()
+           print(“Roger {}“.format(msg_recu))
+           client.send(b”5 / 5")
+           if msg_recu == “end”:
+               serveur_lance = False
+print(“Connections ended”)
+for client in clients_connectes:
+   client.close()
+connexion_principale.close()
+
+
+
+SERVEUR
+------------------------------------
+import socket
+hote = “172.180.0.129”
+port = 12800
+
+### Connection to server & id sending ###
+connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+connexion_avec_serveur.connect((hote, port))
+print(“Connection established on port {}“.format(port))
+connexion_avec_serveur.send(b”Hello !“)
+msg_recu = connexion_avec_serveur.recv(1024)
+print(msg_recu.decode())
+ok = b”"
+while ok == b”Ok”:
+   ok = connexion_avec_serveur.recv(1024)
+   print(ok.decode())
+   msg_a_envoyer = input(“> “)
+   msg_a_envoyer = msg_a_envoyer.encode()
+   connexion_avec_serveur.send(msg_a_envoyer)
+      
+### Commands to send ####
+msg_a_envoyer = b”"
+while msg_a_envoyer != b”end”:
+   msg_a_envoyer = input(“> “)
+   msg_a_envoyer = msg_a_envoyer.encode()
+   connexion_avec_serveur.send(msg_a_envoyer)
+   msg_recu = connexion_avec_serveur.recv(1024)
+print(“The connection is ending”)
+connexion_avec_serveur.close()
